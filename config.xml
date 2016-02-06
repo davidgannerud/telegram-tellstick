@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<control>
+	<devices>
+		<switch name="Bedroom" protocol="arctech" model="selflearning-switch" house="1234" unit="1"/>
+		<switch name="Livingroom" protocol="arctech" model="selflearning-switch" house="1234" unit="2"/>
+		<switch name="Kitchen" protocol="everflourish" house="7272" unit="2"/>
+		<switch name="Diningroom" protocol="sartano" code='0000000100'/>
+	</devices>
+	
+	<group name="Alla" repeats="2">
+		<switch name="Bedroom"/>
+		<switch name="Livingroom" />
+		<switch name="Kitchen"/>
+		<switch name="Diningroom"/>
+	</group>
+	
+	<group name="Test" repeats="1">
+		<switch name="Livingroom"/>
+		<switch name="Diningroom"/>
+	</group>
+
+	<!-- Choose your own button names -->
+	<btn_on name="On"/>
+	<btn_off name="Off"/>
+	<btn_return name="Return"/>
+	<btn_groups name="Groups"/>
+	<btn_close name="Close"/>
+</control>
+
