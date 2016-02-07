@@ -7,7 +7,8 @@
 		<switch name="Diningroom" protocol="sartano" code='0000000100'/>
 	</devices>
 	
-	<group name="Alla" repeats="2">
+	<!-- repeats is used to send on/off signal multiple times to problematic receivers -->
+	<group name="All" repeats="2">
 		<switch name="Bedroom"/>
 		<switch name="Livingroom" />
 		<switch name="Kitchen"/>
