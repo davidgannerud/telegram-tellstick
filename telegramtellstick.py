@@ -14,12 +14,12 @@ DF_GROUPS = 2000
 
 def showMainKeyboard(chat_id, user_state):
 	global main_keyboard
-	global userIds
+	global user_ids
 	
 	show_keyboard = {'keyboard': main_keyboard}
 
 	bot.sendMessage(chat_id, 'Light control', reply_markup=show_keyboard)
-	user_state[userIds.index(chat_id)] = DF_DEFAULT
+	user_state[user_ids.index(chat_id)] = DF_DEFAULT
 
 
 def showGroupsKeyboard(chat_id, user_state):
@@ -28,29 +28,37 @@ def showGroupsKeyboard(chat_id, user_state):
 	show_keyboard = {'keyboard': group_keyboard}
 
 	bot.sendMessage(chat_id, xml_config.control.btn_groups['name'], reply_markup=show_keyboard)
-	user_state[userIds.index(chat_id)] = DF_GROUPS
+	user_state[user_ids.index(chat_id)] = DF_GROUPS
 
 def groupCommand(chat_id, command, user_state):
-	global userIds
+	global user_ids
+	repeats = 0
 	
 	if command == xml_config.control.btn_on['name'].lower():
-		group_index = user_state[userIds.index(chat_id)] - DF_GROUPS
-		for i in range(2, len(groups[group_index])):
-			light_index = names.index(groups[group_index][i])
- 			lightList[light_index].turn_on()
- 		showMainKeyboard(chat_id, user_state)
+		group_index = user_state[user_ids.index(chat_id)] - DF_GROUPS
+		while repeats < groups[group_index][1]:
+			repeats += 1
+			for i in range(2, len(groups[group_index])):
+				light_index = names.index(groups[group_index][i])
+				light_list[light_index].turn_on()
+			showMainKeyboard(chat_id, user_state)
 	elif command == xml_config.control.btn_off['name'].lower():
-		group_index = user_state[userIds.index(chat_id)] - DF_GROUPS
-		for i in range(2, len(groups[group_index])):
-			light_index = names.index(groups[group_index][i])
- 			lightList[light_index].turn_off()
- 		showMainKeyboard(chat_id, user_state)
+		group_index = user_state[user_ids.index(chat_id)] - DF_GROUPS
+		while repeats < groups[group_index][1]:
+			repeats += 1
+			for i in range(2, len(groups[group_index])):
+				light_index = names.index(groups[group_index][i])
+				light_list[light_index].turn_off()
+			showMainKeyboard(chat_id, user_state)
 	elif command == xml_config.control.btn_return['name'].lower():
-		showMainKeyboard(chat_id, user_state)
+		if user_state[user_ids.index(chat_id)] == DF_GROUPS:
+			showMainKeyboard(chat_id, user_state)
+		else:
+			showGroupsKeyboard(chat_id, user_state)
 	else:
 		for index in range(0, len(groups)):
 			if command == groups[index][0].lower():
-				user_state[userIds.index(chat_id)] += index
+				user_state[user_ids.index(chat_id)] += index
 				break
 				
 		show_keyboard = {'keyboard': [  [xml_config.control.btn_on['name']],
@@ -60,18 +68,17 @@ def groupCommand(chat_id, command, user_state):
 
 def singleCommand(chat_id, command, user_state):
 	if command == xml_config.control.btn_on['name'].lower():
-		lightList[user_state[userIds.index(chat_id)] - DF_SINGLE].turn_on()
-		showMainKeyboard(chat_id, user_state)
+		light_list[user_state[user_ids.index(chat_id)] - DF_SINGLE].turn_on()
 	elif command == xml_config.control.btn_off['name'].lower():
-		lightList[user_state[userIds.index(chat_id)] - DF_SINGLE].turn_off()
-		showMainKeyboard(chat_id, user_state)
-	elif command == xml_config.control.btn_return['name'].lower():
-		showMainKeyboard(chat_id, user_state)
+		light_list[user_state[user_ids.index(chat_id)] - DF_SINGLE].turn_off()
+# 	elif command == xml_config.control.btn_return['name'].lower():
+
+	showMainKeyboard(chat_id, user_state)
 
 def lights(chat_id, command):
 	print command
 
-	if (user_state[userIds.index(chat_id)]) == DF_DEFAULT:
+	if (user_state[user_ids.index(chat_id)]) == DF_DEFAULT:
 		if command == xml_config.control.btn_close['name'].lower():
 			 hide_keyboard = {'hide_keyboard': True}
 			 bot.sendMessage(chat_id, u'Close light control', reply_markup=hide_keyboard)
@@ -84,11 +91,11 @@ def lights(chat_id, command):
 													[xml_config.control.btn_off['name']],
 													[xml_config.control.btn_return['name']]]}
 					bot.sendMessage(chat_id, names[index], reply_markup=show_keyboard)
-					user_state[userIds.index(chat_id)] = DF_SINGLE + index
+					user_state[user_ids.index(chat_id)] = DF_SINGLE + index
 					break
-	elif (user_state[userIds.index(chat_id)] & DF_SINGLE) == DF_SINGLE:
+	elif (user_state[user_ids.index(chat_id)] & DF_SINGLE) == DF_SINGLE:
 		singleCommand(chat_id, command, user_state)
-	elif (user_state[userIds.index(chat_id)] & DF_GROUPS) == DF_GROUPS:
+	elif (user_state[user_ids.index(chat_id)] & DF_GROUPS) == DF_GROUPS:
 		groupCommand(chat_id, command, user_state)
 
 
@@ -98,15 +105,15 @@ def handle(msg):
 	content_type, chat_type, chat_id = telepot.glance2(msg)
 	validUser = False
 
-	# only respond to one user
-	for user in userIds:
+	# Only respond valid users
+	for user in user_ids:
 		if chat_id == user:
 			validUser = True
 		
 	if validUser == False:
 		return
 
-	# ignore non-text message
+	# Ignore non-text message
 	if content_type != 'text':
 		return
 
@@ -124,11 +131,11 @@ def handle(msg):
 # Getting the token from command-line is better than embedding it in code,
 # because tokens are supposed to be kept secret.
 TOKEN = sys.argv[1]
-userIds = []
+user_ids = []
 user_state = []
 
 for index in range(2, len(sys.argv)):
-	userIds.append(long(sys.argv[index]))
+	user_ids.append(long(sys.argv[index]))
 	user_state.append(DF_DEFAULT)
 
 localtime = time.asctime( time.localtime(time.time()) )
@@ -136,7 +143,7 @@ print "Local current time :", localtime
 
 print 'Init telldus core'
 lightcore = TelldusCore()
-lightList = []
+light_list = []
 names = []
 groups = []
 
@@ -145,7 +152,7 @@ xml_config = untangle.parse('config.xml')
 
 for switch in xml_config.control.devices.switch:
 	names.append(switch['name'])
-	lightList.append(lightcore.add_device(  switch['name'], 
+	light_list.append(lightcore.add_device(  switch['name'], 
 											switch['protocol'], 
 											switch['model'], 
 											house=switch['house'], 
@@ -191,10 +198,13 @@ main_keyboard[row].append(xml_config.control.btn_close['name'])
 group_keyboard = []
 group_keyboard.append([])
 
+row = 0
 for groupName in groups:
-	group_keyboard[0].append(groupName[0])
+	group_keyboard[row].append(groupName[0])
+	group_keyboard.append([])
+	row += 1
 
-group_keyboard[0].append(xml_config.control.btn_return['name'])
+group_keyboard[row].append(xml_config.control.btn_return['name'])
 
 
 print 'Init bot'
