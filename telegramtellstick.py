@@ -36,20 +36,20 @@ def groupCommand(chat_id, command, user_state):
 	
 	if command == xml_config.control.btn_on['name'].lower():
 		group_index = user_state[user_ids.index(chat_id)] - DF_GROUPS
-		while repeats < groups[group_index][1]:
+		while repeats < int(groups[group_index][1]):
 			repeats += 1
 			for i in range(2, len(groups[group_index])):
 				light_index = names.index(groups[group_index][i])
 				light_list[light_index].turn_on()
-			showMainKeyboard(chat_id, user_state)
+		showMainKeyboard(chat_id, user_state)
 	elif command == xml_config.control.btn_off['name'].lower():
 		group_index = user_state[user_ids.index(chat_id)] - DF_GROUPS
-		while repeats < groups[group_index][1]:
+		while repeats < int(groups[group_index][1]):
 			repeats += 1
 			for i in range(2, len(groups[group_index])):
 				light_index = names.index(groups[group_index][i])
 				light_list[light_index].turn_off()
-			showMainKeyboard(chat_id, user_state)
+		showMainKeyboard(chat_id, user_state)
 	elif command == xml_config.control.btn_return['name'].lower():
 		if user_state[user_ids.index(chat_id)] == DF_GROUPS:
 			showMainKeyboard(chat_id, user_state)
