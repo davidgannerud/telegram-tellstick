@@ -9,8 +9,8 @@ import os
 import untangle
 
 DF_DEFAULT = 0
-DF_SINGLE = 1000
-DF_GROUPS = 2000
+DF_SINGLE = 0x100
+DF_GROUPS = 0x200
 
 def showMainKeyboard(chat_id, user_state):
 	global main_keyboard
@@ -71,7 +71,6 @@ def singleCommand(chat_id, command, user_state):
 		light_list[user_state[user_ids.index(chat_id)] - DF_SINGLE].turn_on()
 	elif command == xml_config.control.btn_off['name'].lower():
 		light_list[user_state[user_ids.index(chat_id)] - DF_SINGLE].turn_off()
-# 	elif command == xml_config.control.btn_return['name'].lower():
 
 	showMainKeyboard(chat_id, user_state)
 
